@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this replication package, please cite it together with the article it accompanies."
+title: "Replication package: The Proem and Epilogue of Alcidamas' On the Sophists: A Case for Interpolation"
+authors:
+  - family-names: Schiappa
+    given-names: Edward
+type: software
+version: 1.0.0
+date-released: "2026-09-13"
+# doi: 10.5281/zenodo.XXXXXXX   <- fill in after Zenodo mints the DOI
+repository-code: "https://github.com/edwardschiappa/alcidamas-replication"
+license: MIT
+keywords:
+  - Alcidamas
+  - Greek rhetoric
+  - Greek particles
+  - interpolation
+  - stylometry
+  - computational philology
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Schiappa
+      given-names: Edward
+  title: "The Proem and Epilogue of Alcidamas' On the Sophists: A Case for Interpolation"
+  journal: "Rhetorica: A Journal of the History of Rhetoric"
+  year: 2026
+  notes: "forthcoming"
