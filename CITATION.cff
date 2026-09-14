@@ -7,7 +7,7 @@ authors:
 type: software
 version: 1.0.0
 date-released: "2026-09-13"
-# doi: 10.5281/zenodo.XXXXXXX   <- fill in after Zenodo mints the DOI
+doi: 10.5281/zenodo.22753893
 repository-code: "https://github.com/edwardschiappa/AlcidamasReplication"
 license: MIT
 keywords:
