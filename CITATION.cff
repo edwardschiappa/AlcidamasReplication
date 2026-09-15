@@ -5,9 +5,9 @@ authors:
   - family-names: Schiappa
     given-names: Edward
 type: software
-version: 1.0.0
-date-released: "2026-09-13"
-doi: 10.5281/zenodo.22753893
+version: 1.0.1
+date-released: "2026-09-15"
+doi: 10.5281/zenodo.22753892
 repository-code: "https://github.com/edwardschiappa/AlcidamasReplication"
 license: MIT
 keywords:

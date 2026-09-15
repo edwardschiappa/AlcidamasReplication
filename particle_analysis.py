@@ -20,6 +20,9 @@ files to output/ reproducing the article's quantitative tables:
                             (Tables 2 and 5a-5e, extended to all texts)
   sliding_window.csv        frame-length sliding-window test for every text
                             (robustness section)
+  outlier_test.csv          Soph.'s composite-density ratio tested against the
+                            comparison texts as a sample of single-author
+                            variation (note to the Table 3 discussion)
 
 DATA FORMAT
   Each file in data/ is UTF-8 plain text with three sections introduced by
@@ -427,6 +430,88 @@ def write_csv(path, header, rows):
         writer.writerows(rows)
     print('wrote', path)
 
+# --------------------------------------------------------------------------
+# Outlier test on the composite-density ratio (note to the Table 3 discussion)
+# --------------------------------------------------------------------------
+
+def _betacf(a, b, x):
+    """Continued fraction for the incomplete beta function (Numerical
+    Recipes, betacf)."""
+    MAXIT, EPS, FPMIN = 200, 3e-14, 1e-300
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    if abs(d) < FPMIN:
+        d = FPMIN
+    d = 1.0 / d
+    h = d
+    for m in range(1, MAXIT + 1):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        if abs(d) < FPMIN:
+            d = FPMIN
+        c = 1.0 + aa / c
+        if abs(c) < FPMIN:
+            c = FPMIN
+        d = 1.0 / d
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        if abs(d) < FPMIN:
+            d = FPMIN
+        c = 1.0 + aa / c
+        if abs(c) < FPMIN:
+            c = FPMIN
+        d = 1.0 / d
+        de = d * c
+        h *= de
+        if abs(de - 1.0) < EPS:
+            break
+    return h
+
+def _betainc(a, b, x):
+    """Regularised incomplete beta function I_x(a, b)."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    lbeta = math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
+    front = math.exp(lbeta + a * math.log(x) + b * math.log(1.0 - x))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _betacf(a, b, x) / a
+    return 1.0 - front * _betacf(b, a, 1.0 - x) / b
+
+def t_sf(t, df):
+    """Upper-tail probability P(T > t) for Student's t with df degrees of
+    freedom (one-sided p-value)."""
+    x = df / (df + t * t)
+    p = 0.5 * _betainc(df / 2.0, 0.5, x)
+    return p if t >= 0 else 1.0 - p
+
+def outlier_test(results, comparison_ids, test_id='alcidamas_soph'):
+    """Prediction-interval t-test: is the test text's composite-density
+    ratio (MB : P+E, Table 3 final column) consistent with the comparison
+    texts treated as a sample of single-author variation?
+
+    Ratios are compared on the natural-log scale, so that ratios below and
+    above 1.00 are weighted symmetrically.  With n comparison values of mean
+    m and sample standard deviation s, the statistic for a new value x is
+    t = (x - m) / (s * sqrt(1 + 1/n)) on n - 1 degrees of freedom; the
+    one-sided p is the probability that a further single-author text would
+    show a ratio at least as large.
+    """
+    def log_ratio(r):
+        return math.log(ratios(r)['density'])
+    vals = [log_ratio(results[i]) for i in comparison_ids if i in results]
+    n = len(vals)
+    m = sum(vals) / n
+    s = math.sqrt(sum((v - m) ** 2 for v in vals) / (n - 1))   # sample SD
+    x = log_ratio(results[test_id])
+    z = (x - m) / s
+    t = (x - m) / (s * math.sqrt(1.0 + 1.0 / n))
+    return {'n': n, 'mean': m, 'sd': s, 'x': x, 'sd_units': z,
+            't': t, 'df': n - 1, 'p': t_sf(t, n - 1)}
+
 def main():
     data_dir = sys.argv[1] if len(sys.argv) > 1 else 'data'
     out_dir = sys.argv[2] if len(sys.argv) > 2 else 'output'
@@ -562,6 +647,24 @@ def main():
               ['Text', 'Windows', 'z γάρ', 'z μέν', 'z δέ', 'z καί',
                'z density', '% ≥extreme γάρ', '% μέν', '% δέ', '% καί',
                '% density', '% joint 5-feature', '% joint 3-main'], rows)
+
+    # Outlier test on the composite-density ratio (note to the Table 3 discussion)
+    if 'alcidamas_soph' in results:
+        controls = [tid for tid, label, group in TEXTS if group == 'control']
+        supplementary = [tid for tid, label, group in TEXTS
+                         if group == 'supplementary']
+        rows = []
+        for name, ids in [('six control texts (Table 3)', controls),
+                          ('eleven comparison texts (Tables 3 and 5)',
+                           controls + supplementary)]:
+            o = outlier_test(results, ids)
+            rows.append([name, o['n'], fmt(o['mean'], 3), fmt(o['sd'], 3),
+                         fmt(o['x'], 3), fmt(o['sd_units'], 2),
+                         fmt(o['t'], 2), o['df'], fmt(o['p'], 4)])
+        write_csv(os.path.join(out_dir, 'outlier_test.csv'),
+                  ['Comparison set', 'n', 'Mean log ratio', 'SD log ratio',
+                   'Soph. log ratio', 'SD units from mean', 't', 'df',
+                   'one-sided p'], rows)
 
     print('done.')
 
