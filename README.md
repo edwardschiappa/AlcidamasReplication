@@ -83,7 +83,7 @@ All published figures are the script's values rounded once at output. Where a ra
 
 ## 6. Data provenance and licensing
 
-The code is released under the MIT licence (see `LICENSE`). The Greek texts reproduce editions in the public domain as digitised by the Perseus Digital Library / Scaife Viewer, whose texts are distributed under a Creative Commons Attribution-ShareAlike licence; `data/SOURCES.md` gives the edition and source for each file. All thirteen texts were taken from the Perseus Digital Library (Tufts University), read through the Scaife Viewer; none derives from the Thesaurus Linguae Graecae. The TLG was used in the article only for lexical proximity searches, which are described in the article's notes and are reproducible by any TLG subscriber.
+Licensing: the code and documentation are released under the MIT licence (see `LICENSE`); the Greek text files in `data/` are released under the Creative Commons Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0; see `data/LICENSE`), as derivatives of Perseus Digital Library texts. The texts reproduce editions in the public domain as digitised by the Perseus Digital Library / Scaife Viewer, whose texts are distributed under a Creative Commons Attribution-ShareAlike licence; `data/SOURCES.md` gives the edition and source for each file. All thirteen texts were taken from the Perseus Digital Library (Tufts University), read through the Scaife Viewer; none derives from the Thesaurus Linguae Graecae. The TLG was used in the article only for lexical proximity searches, which are described in the article's notes and are reproducible by any TLG subscriber.
 
 ## 7. Acknowledgement of AI assistance
 

@@ -1,0 +1,13 @@
+The Greek text files in this directory are released under the Creative Commons
+Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/
+
+They are derivatives of texts published by the Perseus Digital Library (Tufts
+University) through the Scaife Viewer, which are distributed under Creative
+Commons Attribution-ShareAlike terms; SOURCES.md in this directory gives the
+edition and the Perseus source of each file, and the changes made to each.
+The underlying editions (Littre 1849; Blass 1892 and 1908; Marchant 1920;
+Norlin 1928-29) are in the public domain.
+
+The code and documentation in the parent directory are licensed separately
+under the MIT licence (see ../LICENSE).
