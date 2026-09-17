@@ -23,6 +23,8 @@ files to output/ reproducing the article's quantitative tables:
   outlier_test.csv          Soph.'s composite-density ratio tested against the
                             comparison texts as a sample of single-author
                             variation (note to the Table 3 discussion)
+  sentence_outlier_test.csv the same test on the frame:body ratio of mean
+                            sentence length (note to the Table 1 discussion)
 
 DATA FORMAT
   Each file in data/ is UTF-8 plain text with three sections introduced by
@@ -488,10 +490,24 @@ def t_sf(t, df):
     p = 0.5 * _betainc(df / 2.0, 0.5, x)
     return p if t >= 0 else 1.0 - p
 
-def outlier_test(results, comparison_ids, test_id='alcidamas_soph'):
-    """Prediction-interval t-test: is the test text's composite-density
-    ratio (MB : P+E, Table 3 final column) consistent with the comparison
-    texts treated as a sample of single-author variation?
+def density_ratio(result):
+    """Composite-density ratio MB : P+E (final column of Tables 3 and 5)."""
+    return ratios(result)['density']
+
+def sentence_length_ratio(result):
+    """Frame : body ratio of mean sentence length, the frame's mean taken
+    over P and E together (from the counts underlying Tables 1 and 4)."""
+    p, mb, e = (result['sections'][s] for s in SECTIONS)
+    frame_mean = (p['words'] + e['words']) / (p['sentences'] + e['sentences'])
+    body_mean = mb['words'] / mb['sentences']
+    return frame_mean / body_mean
+
+def outlier_test(results, comparison_ids, test_id='alcidamas_soph',
+                 value=density_ratio):
+    """Prediction-interval t-test: is the test text's value of `value`
+    (by default the composite-density ratio MB : P+E, Table 3 final column;
+    alternatively the frame:body ratio of mean sentence length) consistent
+    with the comparison texts treated as a sample of single-author variation?
 
     Ratios are compared on the natural-log scale, so that ratios below and
     above 1.00 are weighted symmetrically.  With n comparison values of mean
@@ -501,7 +517,7 @@ def outlier_test(results, comparison_ids, test_id='alcidamas_soph'):
     show a ratio at least as large.
     """
     def log_ratio(r):
-        return math.log(ratios(r)['density'])
+        return math.log(value(r))
     vals = [log_ratio(results[i]) for i in comparison_ids if i in results]
     n = len(vals)
     m = sum(vals) / n
@@ -662,6 +678,21 @@ def main():
                          fmt(o['x'], 3), fmt(o['sd_units'], 2),
                          fmt(o['t'], 2), o['df'], fmt(o['p'], 4)])
         write_csv(os.path.join(out_dir, 'outlier_test.csv'),
+                  ['Comparison set', 'n', 'Mean log ratio', 'SD log ratio',
+                   'Soph. log ratio', 'SD units from mean', 't', 'df',
+                   'one-sided p'], rows)
+
+        # The same test on the frame:body ratio of mean sentence length
+        # (note to the Table 1 discussion)
+        rows = []
+        for name, ids in [('six control texts (Table 1)', controls),
+                          ('eleven comparison texts (Tables 1 and 4)',
+                           controls + supplementary)]:
+            o = outlier_test(results, ids, value=sentence_length_ratio)
+            rows.append([name, o['n'], fmt(o['mean'], 3), fmt(o['sd'], 3),
+                         fmt(o['x'], 3), fmt(o['sd_units'], 2),
+                         fmt(o['t'], 2), o['df'], fmt(o['p'], 4)])
+        write_csv(os.path.join(out_dir, 'sentence_outlier_test.csv'),
                   ['Comparison set', 'n', 'Mean log ratio', 'SD log ratio',
                    'Soph. log ratio', 'SD units from mean', 't', 'df',
                    'one-sided p'], rows)
